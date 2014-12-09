@@ -553,8 +553,10 @@ struct platform_device bcm215xx_lcdc_device = {
 };
 #endif
 
-#define BCM_CORECLK_TURBO	BCM21553_CORECLK_KHZ_832
+#define BCM_CORE_CLK_LOW	BCM21553_CORECLK_KHZ_156
 #define BCM_CORE_CLK_NORMAL	BCM21553_CORECLK_KHZ_312
+#define BCM_CORE_CLK_MIDDLE	BCM21553_CORECLK_KHZ_624
+#define BCM_CORE_CLK_TURBO	BCM21553_CORECLK_KHZ_832
 
 #if defined(CONFIG_BCM_CPU_FREQ)
 /*********************************************************************
@@ -563,18 +565,24 @@ struct platform_device bcm215xx_lcdc_device = {
 
 /* Indices for the voltage to frequency mapping table */
 enum {
+	BCM_LOW_MODE,
 	BCM_NORMAL_MODE,
+	BCM_MIDDLE_MODE,
 	BCM_TURBO_MODE,
 };
 
 /* Voltage-Frequency mapping for BCM21553 CPU0 */
 static struct bcm_freq_tbl bcm215xx_cpu0_freq_tbl[] = {
 #if defined(CONFIG_MFD_MAX8986)
-	FTBL_INIT(BCM_CORE_CLK_NORMAL / 1000, 1200000),
-	FTBL_INIT(BCM_CORECLK_TURBO / 1000, 1360000),
+	FTBL_INIT(BCM_CORE_CLK_LOW / 1000, 1180000),
+	FTBL_INIT(BCM_CORE_CLK_NORMAL / 1000, 1240000),
+	FTBL_INIT(BCM_CORE_CLK_MIDDLE / 1000, 1300000),
+	FTBL_INIT(BCM_CORE_CLK_TURBO / 1000, 1360000),
 #elif defined(CONFIG_MFD_D2041)
-	FTBL_INIT(BCM_CORE_CLK_NORMAL / 1000, 1200000),
-	FTBL_INIT(BCM_CORECLK_TURBO / 1000, 1375000),
+	FTBL_INIT(BCM_CORE_CLK_LOW / 1000, 1180000),
+	FTBL_INIT(BCM_CORE_CLK_NORMAL / 1000, 1240000),
+	FTBL_INIT(BCM_CORE_CLK_MIDDLE / 1000, 1300000),
+	FTBL_INIT(BCM_CORE_CLK_TURBO / 1000, 1375000),
 #endif
 };
 /* BCM21553 CPU info */
@@ -610,7 +618,7 @@ struct platform_device bcm21553_cpufreq_drv = {
  *********************************************************************/
 
 static struct bcm21553_cpufreq_gov_plat bcm21553_cpufreq_gov_plat = {
-	.freq_turbo = BCM_CORECLK_TURBO,
+	.freq_turbo = BCM_CORE_CLK_TURBO,
 	.freq_normal = BCM_CORE_CLK_NORMAL,
 };
 
@@ -715,8 +723,14 @@ static void bcm215xx_avs_notify(int silicon_type)
 	}
 
 	if (normal >= 0)
+	{
+		bcm215xx_cpu0_freq_tbl[BCM_LOW_MODE].cpu_voltage =
+			(u32)normal;
 		bcm215xx_cpu0_freq_tbl[BCM_NORMAL_MODE].cpu_voltage =
 			(u32)normal;
+		bcm215xx_cpu0_freq_tbl[BCM_MIDDLE_MODE].cpu_voltage =
+			(u32)normal;
+	}
 	if (turbo >= 0)
 		bcm215xx_cpu0_freq_tbl[BCM_TURBO_MODE].cpu_voltage =
 			(u32)turbo;
