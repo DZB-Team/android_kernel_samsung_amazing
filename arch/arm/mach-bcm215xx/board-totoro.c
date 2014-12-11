@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Copyright 2010 Broadcom Corporation.  All rights reserved.
 *
-*	@file	arch/arm/mach-bcm215xx/board-totoro.c
+*	@file	arch/arm/mach-bcm215xx/board-bcm21553.c
 *
 * Unless you and Broadcom execute a separate written software license agreement
 * governing use of this software, this software is licensed to you under the
@@ -159,6 +159,7 @@
  * Reset the bitmap to indicate the GPT not to be used on AP
  */
 #define GPT_AVAIL_BITMAP         0x3F
+
 #define BATT_FULL_VOLT		4200
 #define BATT_LEVEL5_VOLT	3950
 #define BATT_LEVEL4_VOLT	3860
@@ -169,7 +170,6 @@
 #define BATT_LEVEL0_1_VOLT	3500
 #define BATT_LOW_VOLT		3400
 
-
 extern int pmu_is_charger_inserted();
 #define KEY_PRESS_THRESHOLD	0x6d00
 #define KEY_3POLE_THRESHOLD	670	// ~ 55 and 57 ~, measured on Totoro
@@ -179,7 +179,6 @@ extern int pmu_is_charger_inserted();
 #define KEY2_THRESHOLD_U	220
 #define KEY3_THRESHOLD_L	220	// 202 to 314, mesaured on Luisa
 #define KEY3_THRESHOLD_U	478
-
 
 extern int bcm_gpio_pull_up(unsigned int gpio, bool up);
 extern int bcm_gpio_pull_up_down_enable(unsigned int gpio, bool enable);
@@ -565,7 +564,7 @@ static void bcm_keypad_config_iocr(int row, int col)
 	writel((SYSCFG_IOCR1_KEY_ROW(row) | SYSCFG_IOCR1_KEY_COL(col)),
 				ADDR_SYSCFG_IOCR1);
 }
-#if defined(CONFIG_TOUCHSCREEN_MMS128_REV04) || defined(CONFIG_TOUCHSCREEN_MMS128) ||  defined(CONFIG_TOUCHSCREEN_F760) 
+
 static struct bcm_keymap newKeymap[] = {
 	{BCM_KEY_ROW_0, BCM_KEY_COL_0, "Volume Up", KEY_VOLUMEUP},
 	{BCM_KEY_ROW_0, BCM_KEY_COL_1, "unused", 0},
@@ -787,7 +786,6 @@ static struct i2c_board_info __initdata bcm21553_cam_i2c_board_info[] = {
          .irq = IRQ_CAM_CCP2, 
          },
 };
-#endif
 
 #if defined (CONFIG_INPUT_BMA150_SMB380)
 int bma_gpio_init(struct device *dev)
@@ -1574,6 +1572,7 @@ static void max8986_load_sysparm(int sysparm_index, int regl_addr,
 	int ret;
 
 	ret = SYSPARM_GetPMURegSettings(sysparm_index, &parm);
+
 	if (ret == 0)
 		max8986->write_dev(max8986, MAX8986_PM_REG_ADISCHARGE2, parm);
 }
@@ -1670,6 +1669,26 @@ static struct platform_device bma222_i2c_gpio_device = {
         },
 };
 #endif
+#if defined(CONFIG_SENSORS_K3DH)
+#define ACC_SDA 15
+#define ACC_SCL 7
+
+#if defined(CONFIG_I2C_GPIO)
+static struct i2c_gpio_platform_data k3dh_i2c_gpio_data = {
+        .sda_pin    = ACC_SDA,
+        .scl_pin    = ACC_SCL,
+        .udelay  = 3,  //// brian :3
+        .timeout = 100,
+};
+
+static struct platform_device k3dh_i2c_gpio_device = {
+        .name       = "i2c-gpio",
+        .id     = 0x4,
+        .dev        = {
+                .platform_data  = &k3dh_i2c_gpio_data,
+        },
+};
+#endif
 #endif
 
 #if defined(CONFIG_SENSORS_GP2A)
@@ -1689,6 +1708,28 @@ static struct platform_device gp2a_i2c_gpio_device = {
         .id     = 0x5,
         .dev        = {
                 .platform_data  = &gp2a_i2c_gpio_data,
+        },
+};
+#endif
+#endif
+
+#if defined(CONFIG_SENSORS_HSCD)
+#define GEO_SDA 14
+#define GEO_SCL 5
+
+#if defined(CONFIG_I2C_GPIO)
+static struct i2c_gpio_platform_data hscd_i2c_gpio_data = {
+        .sda_pin    = GEO_SDA,
+        .scl_pin    = GEO_SCL,
+        .udelay  = 3,  //// brian :3
+        .timeout = 100,
+};
+
+static struct platform_device hscd_i2c_gpio_device = {
+        .name       = "i2c-gpio",
+        .id     = 0x5,
+        .dev        = {
+                .platform_data  = &hscd_i2c_gpio_data,
         },
 };
 #endif
@@ -1727,7 +1768,6 @@ module_init(sensors_init);
 #define TSP_SDA 27
 #define TSP_SCL 26
 
-
 #if defined(CONFIG_I2C_GPIO)
 static struct i2c_gpio_platform_data touch_i2c_gpio_data = {
         .sda_pin    = TSP_SDA,
@@ -1763,6 +1803,15 @@ static struct i2c_board_info __initdata athenaray_i2cgpio0_board_info[] = {
 	{
 				I2C_BOARD_INFO("synaptics-rmi-ts", 0x20),
 				.irq = GPIO_TO_IRQ(TSP_INT),
+	},
+#endif
+#if defined(CONFIG_TOUCHSCREEN_BT403) 
+	{
+		I2C_BOARD_INFO("zinitix_isp", 0x50),
+	 },
+	{
+		I2C_BOARD_INFO("Zinitix_tsp", 0x20),
+		.irq = gpio_to_irq(TSP_INT),
 	},
 #endif
 };
@@ -1992,8 +2041,8 @@ static struct android_usb_platform_data android_usb_pdata = {
 	.product_id = 0x0005,
 	.adb_product_id = 0x0002,
 	.version = 0x0100,
-	.product_name = "BCM21553-Thunderbird",
-	.manufacturer_name = "Broadcom",
+	.product_name = "GT-S5360",
+	.manufacturer_name = "Samsung",
 	.serial_number="0123456789ABCDEF",
 	.nluns = 1,
 };
@@ -2245,6 +2294,7 @@ int board_sysconfig(uint32_t module, uint32_t op)
                         val = readl(ADDR_SYSCFG_IOCR5);
                         val |= SYSCFG_IOCR5_CAM_TRACE_EN;
                         writel(val, ADDR_SYSCFG_IOCR5);
+#if defined(CONFIG_BOARD_TOTORO)
                         val = readl(ADDR_SYSCFG_IOCR1);
                         val &= ~(1<<4);
                         writel(val, ADDR_SYSCFG_IOCR1);  //set gpio
@@ -2257,7 +2307,7 @@ int board_sysconfig(uint32_t module, uint32_t op)
                         val = readl(ADDR_GPIO_GPOR0);
                         val &= ~(1<<4);//set register
                         writel(val, ADDR_GPIO_GPOR0);  //set gpio value
-
+#endif
 
                   } else if(op == SYSCFG_ENABLE){
                         u32 val;
@@ -3037,8 +3087,6 @@ static void totoro_init_gpio(void)
 
 }
 
-
-
 static void __init bcm21553_init_machine(void)
 {
 	bcm21553_platform_init();
@@ -3048,6 +3096,7 @@ static void __init bcm21553_init_machine(void)
 	platform_add_devices(devices, ARRAY_SIZE(devices));
 
 	totoro_init_gpio();
+
 	
 #ifdef CONFIG_SPI
 	/*Function to register SPI board info : required when spi device is
@@ -3101,7 +3150,7 @@ static int __init ramdump_init(void)
 module_init(ramdump_init);
 
 /* TODO: Replace BCM1160 with BCM21553/AthenaRay once registered */
-MACHINE_START(BCM1160, "BCM21553 ThunderbirdEDN31 platform")
+MACHINE_START(BCM1160, "GT-S5360 Board")
 	/* Maintainer: Broadcom Corporation */
 	.phys_io = BCM21553_UART_A_BASE,
 	.io_pg_offst = (IO_ADDRESS(BCM21553_UART_A_BASE) >> 18) & 0xfffc,
