@@ -3733,7 +3733,7 @@ static int __init ramdump_init(void)
 module_init(ramdump_init);
 
 /* TODO: Replace BCM1160 with BCM21553/AthenaRay once registered */
-MACHINE_START(BCM1160, "BCM21553 ThunderbirdEDN31 platform")
+MACHINE_START(BCM1160, "GT-S6802 Board")
 	/* Maintainer: Broadcom Corporation */
 	.phys_io = BCM21553_UART_A_BASE,
 	.io_pg_offst = (IO_ADDRESS(BCM21553_UART_A_BASE) >> 18) & 0xfffc,
