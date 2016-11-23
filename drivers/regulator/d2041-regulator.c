@@ -409,7 +409,6 @@ static struct regulator_init_data d2041_regulators_init_data[D2041_NUMBER_OF_REG
             .max_uV = mV_to_uV(D2041_LDO_VOLT_UPPER),
             .valid_ops_mask = REGULATOR_CHANGE_VOLTAGE | REGULATOR_CHANGE_STATUS,
             .valid_modes_mask = REGULATOR_MODE_NORMAL,
-            .boot_on = 1,
          },
     },
     [D2041_LDO_11] =  {
@@ -1471,4 +1470,3 @@ MODULE_AUTHOR("Dialog Semiconductor Ltd <divyang.patel@diasemi.com>");
 MODULE_DESCRIPTION("D2041 voltage and current regulator driver");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:" DRIVER_NAME);
-
