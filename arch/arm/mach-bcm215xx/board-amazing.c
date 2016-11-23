@@ -1939,15 +1939,15 @@ static u32 pmu_event_callback(int event, int param)
 
 	if(SYSPARM_GetDefault4p2VoltReading())	
 //		Default4p2Volt = SYSPARM_GetDefault4p2VoltReading();
-		Default4p2Volt = 0x364 - 5;
+		Default4p2Volt = 0x364 + 5;
 	else
-		Default4p2Volt = 0x364 - 5;
+		Default4p2Volt = 0x364 + 5;
 
 	if(SYSPARM_GetBattEmptyThresh())
 //		BattEmptyThresh = SYSPARM_GetBattEmptyThresh();
-		BattEmptyThresh = 0x2BF - 5;
+		BattEmptyThresh = 0x2BF + 5;
 	else
-		BattEmptyThresh = 0x2BF - 5;
+		BattEmptyThresh = 0x2BF + 5;
 	
 	printk(KERN_INFO"Default4p2Volt 0x%x\n", Default4p2Volt);
 	printk(KERN_INFO"BattEmptyThresh3P4V 0x%x\n", BattEmptyThresh);
@@ -3733,7 +3733,7 @@ static int __init ramdump_init(void)
 module_init(ramdump_init);
 
 /* TODO: Replace BCM1160 with BCM21553/AthenaRay once registered */
-MACHINE_START(BCM1160, "GT-S6802 Board")
+MACHINE_START(BCM1160, "BCM21553 ThunderbirdEDN31 platform")
 	/* Maintainer: Broadcom Corporation */
 	.phys_io = BCM21553_UART_A_BASE,
 	.io_pg_offst = (IO_ADDRESS(BCM21553_UART_A_BASE) >> 18) & 0xfffc,
